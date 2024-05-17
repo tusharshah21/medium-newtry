@@ -13,10 +13,6 @@ export const userRouter = new Hono<{
   }>();
 
 userRouter.post('/signup', async (c) => {
-	const prisma = new PrismaClient({
-		datasourceUrl: c.env?.DATABASE_URL	,
-	}).$extends(withAccelerate());
-
 	const body = await c.req.json();
 	const{success}=signupInput.safeParse(body);
 	if(!success){
@@ -25,19 +21,26 @@ userRouter.post('/signup', async (c) => {
 			message:"Inputs are not correct"
 		})
 	}
+	const prisma = new PrismaClient({
+		datasourceUrl: c.env?.DATABASE_URL	,
+	}).$extends(withAccelerate());
 	try {
 		const user = await prisma.user.create({
 			data: {
 				username: body.username,
-				password: body.password
+				password: body.password,
+				name:body.name
 			}
 		});
-		const jwt = await sign({ id: user.id }, c.env.JWT_SECRET);
-		return c.json({jwt});
-	} catch(e) {
-    console.log(e);
-		c.status(403);
-		return c.json({ error: "error while signing up" });
+		const jwt = await sign({ 
+			id: user.id 
+		}, c.env.JWT_SECRET);
+
+		return c.text(jwt);
+		} catch(e) {
+    	console.log(e);
+		c.status(411);
+		return c.json({ error: "Invalid" });
 	}
 })
 
@@ -61,5 +64,5 @@ userRouter.post('/signin', async (c) => {
 	}
 
 	const jwt = await sign({ id: user.id }, c.env.JWT_SECRET);
-	return c.json({ jwt });
+	return c.text( jwt );
 })
