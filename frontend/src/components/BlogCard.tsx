@@ -39,7 +39,7 @@ export const BlogCard = ({
   );
 };
 
-export function Avatar({ name,size="small" }: { name: string, size: "small"|"big" }) {
+export function Avatar({ name,size="small" }: { name: string, size?: "small"|"big" }) {
   // console.log("Rendering Avatar with name:", name);
 
   return (
